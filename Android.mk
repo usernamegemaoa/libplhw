@@ -4,5 +4,14 @@ include $(CLEAR_VARS)
 LOCAL_CFLAGS += -Wall -O2
 LOCAL_MODULE := libplhw
 LOCAL_MODULE_TAGS := eng
-LOCAL_SRC_FILES := $(call all-subdir-c-files)
+LOCAL_SRC_FILES := \
+	adc11607.c \
+	cpld.c \
+	dac5820.c \
+	eeprom.c \
+	gpioex.c \
+	hvpmic.c \
+	i2cdev.c \
+	pbtn.c \
+	util.c
 include $(BUILD_STATIC_LIBRARY)
