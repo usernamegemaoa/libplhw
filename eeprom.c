@@ -31,10 +31,12 @@
 #define ADDR_RANGE (32 * 1024)
 #define PAGE_LENGTH 64
 #define WRITE_TIME_US 5000
+#define DEFAULT_I2C_BLOCK_SIZE 96
 
 struct eeprom {
 	struct i2cdev *i2c;
 	size_t offset;
+	size_t block_size;
 	struct {
 		char offset_written:1;
 	} flags;
@@ -52,6 +54,7 @@ struct eeprom *eeprom_init(const char *i2c_bus, char i2c_addr)
 	assert(e != NULL);
 
 	e->offset = 0;
+	e->block_size = DEFAULT_I2C_BLOCK_SIZE;
 	e->i2c = i2cdev_init(i2c_bus, i2c_addr);
 
 	if (e->i2c == NULL)
@@ -86,6 +89,21 @@ size_t eeprom_get_size(struct eeprom *e)
 	return ADDR_RANGE;
 }
 
+void eeprom_set_block_size(struct eeprom *e, size_t block_size)
+{
+	assert(e != NULL);
+	assert(block_size != 0);
+
+	e->block_size = block_size;
+}
+
+size_t eeprom_get_block_size(struct eeprom *e)
+{
+	assert(e != NULL);
+
+	return e->block_size;
+}
+
 void eeprom_seek(struct eeprom *e, size_t offset)
 {
 	assert(e != NULL);
@@ -104,7 +122,6 @@ size_t eeprom_get_offset(struct eeprom *e)
 
 int eeprom_read(struct eeprom *e, char *data, size_t size)
 {
-	static const size_t BLOCK_SIZE = 512;
 	size_t read_size;
 	int blocks;
 	int overrun;
@@ -129,16 +146,17 @@ int eeprom_read(struct eeprom *e, char *data, size_t size)
 	if (!size)
 		return 0;
 
-	blocks = read_size / BLOCK_SIZE;
+	blocks = read_size / e->block_size;
 
-	if (read_size % BLOCK_SIZE)
+	if (read_size % e->block_size)
 		++blocks;
 
 	p = data;
 
 	for (block = 0; block < blocks; ++block) {
 		const size_t b_size =
-			(read_size < BLOCK_SIZE) ? read_size : BLOCK_SIZE;
+			(read_size < e->block_size)
+			? read_size : e->block_size;
 
 		if (i2cdev_read(e->i2c, p, b_size) < 0) {
 			e->offset = INVALID_OFFSET;

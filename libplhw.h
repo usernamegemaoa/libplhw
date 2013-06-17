@@ -141,6 +141,8 @@ extern struct eeprom *eeprom_init(const char *i2c_bus, char i2c_addr);
 extern void eeprom_free(struct eeprom *eeprom);
 
 extern size_t eeprom_get_size(struct eeprom *eeprom);
+extern void eeprom_set_block_size(struct eeprom *eeprom, size_t block_size);
+extern size_t eeprom_get_block_size(struct eeprom *eeprom);
 extern void eeprom_seek(struct eeprom *eeprom, size_t offset);
 extern size_t eeprom_get_offset(struct eeprom *eeprom);
 extern int eeprom_read(struct eeprom *eeprom, char *data, size_t size);
