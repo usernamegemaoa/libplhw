@@ -374,6 +374,9 @@ int hvpmic_set_en(struct hvpmic *p, enum hvpmic_en_id id, int on)
 		break;
 	}
 
+	if (ret < 0)
+		return -1;
+
 	return i2cdev_write_reg8(p->i2c, HVPMIC_REG_ENABLE, &enable.byte, 1);
 }
 
