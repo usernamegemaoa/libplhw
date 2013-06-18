@@ -1,0 +1,9 @@
+Release v0.4 -> v0.5 - 2013-06-17
+
+Guillaume Tucker (5):
+      initial commit: import libplhw v0.4
+      add LGPL v3 license + update all copyright headers
+      eeprom: add eeprom_{get|set}_block size + default to 96
+      hvpmic.c: fix compiler warning about unused variable
+      Android.mk: list all source files to fix Android NDK build
+
