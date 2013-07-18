@@ -39,14 +39,14 @@ struct pbtn {
 
 static int wait_btn(struct pbtn *b, enum pbtn_id mask, int state, int any);
 
-struct pbtn *pbtn_init(const char *i2c_bus, int i2c_addr)
+struct pbtn *pbtn_init(const char *i2c_bus, int i2c_address)
 {
 	struct pbtn *b;
 
 	b = malloc(sizeof (struct pbtn));
 	assert(b != NULL);
 
-	b->gpio = gpioex_init(i2c_bus, i2c_addr, GPIO_PBTN_I_MASK,
+	b->gpio = gpioex_init(i2c_bus, i2c_address, GPIO_PBTN_I_MASK,
 			      GPIO_PBTN_O_MASK);
 
 	if (b->gpio == NULL) {

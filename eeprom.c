@@ -45,7 +45,7 @@ struct eeprom {
 static int sync_offset(struct eeprom *e);
 static int write_page(struct eeprom *e, const char *data, size_t size);
 
-struct eeprom *eeprom_init(const char *i2c_bus, char i2c_addr)
+struct eeprom *eeprom_init(const char *i2c_bus, char i2c_address)
 {
 	struct eeprom *e;
 	int error = 1;
@@ -55,7 +55,7 @@ struct eeprom *eeprom_init(const char *i2c_bus, char i2c_addr)
 
 	e->offset = 0;
 	e->block_size = DEFAULT_I2C_BLOCK_SIZE;
-	e->i2c = i2cdev_init(i2c_bus, i2c_addr);
+	e->i2c = i2cdev_init(i2c_bus, i2c_address);
 
 	if (e->i2c == NULL)
 		LOG("failed to initialise I2C");

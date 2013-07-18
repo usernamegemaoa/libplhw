@@ -31,14 +31,14 @@ struct dac5820 {
 	struct i2cdev *i2c;
 };
 
-struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_addr)
+struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_address)
 {
 	struct dac5820 *dac;
 
 	dac = malloc(sizeof (struct dac5820));
 	assert(dac != NULL);
 
-	dac->i2c = i2cdev_init(i2c_bus, i2c_addr);
+	dac->i2c = i2cdev_init(i2c_bus, i2c_address);
 
 	if (dac->i2c == NULL) {
 		LOG("failed to initialise I2C");

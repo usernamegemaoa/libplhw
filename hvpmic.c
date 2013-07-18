@@ -413,7 +413,7 @@ int hvpmic_get_fault(struct hvpmic *p)
 		return -1;
 
 	if (fault.fbpg)
-		return HVPMIC_FAULT_FPBG;
+		return HVPMIC_FAULT_FBPG;
 
 	if (fault.hvinp)
 		return HVPMIC_FAULT_HVINN;

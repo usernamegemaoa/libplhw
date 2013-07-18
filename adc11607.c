@@ -43,7 +43,7 @@ static void set_ref(struct adc11607 *adc, struct adc11607_setup *setup,
 		    enum adc11607_ref_id ref_id);
 static void set_invalid_results(struct adc11607 *adc);
 
-struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_addr)
+struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_address)
 {
 	struct adc11607 *adc;
 	int error = 1;
@@ -51,7 +51,7 @@ struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_addr)
 	adc = malloc(sizeof (struct adc11607));
 	assert(adc != NULL);
 
-	adc->i2c = i2cdev_init(i2c_bus, i2c_addr);
+	adc->i2c = i2cdev_init(i2c_bus, i2c_address);
 
 	if (adc->i2c == NULL)
 		LOG("failed to initialise I2C");
