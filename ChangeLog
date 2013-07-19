@@ -1,3 +1,10 @@
+Release v0.5 -> v1.0 - 2013-07-19
+
+Guillaume Tucker (3):
+      fix various typos and naming conventions
+      libplhw.h: add Doxygen comments everywhere
+      add setver.sh script to set the library version string
+
 Release v0.4 -> v0.5 - 2013-06-17
 
 Guillaume Tucker (5):

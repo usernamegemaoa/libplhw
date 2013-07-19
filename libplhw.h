@@ -33,7 +33,7 @@
 */
 
 /** Library version */
-#define PLHW_VERSION "0.4"
+#define PLHW_VERSION "1.0"
 
 /** Default I2C bus device */
 #define PLHW_DEF_I2C_BUS "/dev/i2c-0"
