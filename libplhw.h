@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#ifndef min
+# define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 /**
    @file libplhw.h
 
@@ -330,20 +334,40 @@ struct eeprom;
 /** Create an initialised eeprom instance
     @param[in] i2c_bus path to the I2C bus device
     @param[in] i2c_address EEPROM I2C address
+    @param[in] mode EEPROM mode (24c01, 24c256 etc...)
     @return pointer to new eeprom instance or NULL if error
  */
-extern struct eeprom *eeprom_init(const char *i2c_bus, char i2c_address);
+extern struct eeprom *eeprom_init(const char *i2c_bus, char i2c_address,
+				  const char *mode);
 
 /** Free an eeprom instance
     @param[in] eeprom eeprom instance as created by eeprom_init
  */
 extern void eeprom_free(struct eeprom *eeprom);
 
+/** Get the EEPROM mode identifier
+    @param[in] eeprom eeprom instance
+    @return static string with EEPROM mode
+*/
+extern const char *eeprom_get_mode(struct eeprom *eeprom);
+
 /** Get the size of the EEPROM
     @param[in] eeprom eeprom instance
     @return EEPROM size in bytes
  */
 extern size_t eeprom_get_size(struct eeprom *eeprom);
+
+/** Set the EEPROM page size to override default value
+    @param[in] eeprom eeprom instance
+    @paran[in] page_size size of the EEPROM page
+*/
+extern void eeprom_set_page_size(struct eeprom *eeprom, size_t page_size);
+
+/** Get the EEPROM page size
+    @param[in] eeprom eeprom instance
+    @return EEPROM page size
+*/
+extern size_t eeprom_get_page_size(struct eeprom *eeprom);
 
 /** Set the EEPROM block size
     @param[in] eeprom eeprom instance
