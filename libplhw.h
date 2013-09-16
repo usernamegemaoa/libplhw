@@ -25,10 +25,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#ifndef min
-# define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 /**
    @file libplhw.h
 
@@ -41,6 +37,11 @@
 
 /** Default I2C bus device */
 #define PLHW_DEF_I2C_BUS "/dev/i2c-0"
+
+#ifndef min
+/** Get the smallest relative of two integers */
+# define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 
 /**
@@ -359,7 +360,7 @@ extern size_t eeprom_get_size(struct eeprom *eeprom);
 
 /** Set the EEPROM page size to override default value
     @param[in] eeprom eeprom instance
-    @paran[in] page_size size of the EEPROM page
+    @param[in] page_size size of the EEPROM page
 */
 extern void eeprom_set_page_size(struct eeprom *eeprom, size_t page_size);
 
