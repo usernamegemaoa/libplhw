@@ -419,8 +419,6 @@ extern int eeprom_write(struct eeprom *eeprom, const char *data, size_t size);
    This DAC is used on Plastic Logic hardware to generate the VCOM voltage.
 */
 
-#define DAC5820_DEF_I2C_ADDR 0x39    /**< default DAC I2C address */
-
 /** Channel identifiers */
 enum dac5820_channel_id {
 	DAC5820_CH_A = 1,            /**< Identifier for channel A */
@@ -440,7 +438,7 @@ struct dac5820;
 
 /** Create an initialised dac5820 instance
     @param[in] i2c_bus path to the I2C bus device
-    @param[in] i2c_address DAC I2C address
+    @param[in] i2c_address DAC I2C address or PLHW_NO_I2C_ADDR for default
     @return pointer to new dac5820 instance or NULL if error
  */
 extern struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_address);

@@ -21,7 +21,8 @@
 
 #include "dac5820.h"
 #include "i2cdev.h"
-#include "libplhw.h"
+#include <libplhw.h>
+#include <plsdk/plconfig.h>
 #include <assert.h>
 
 #define LOG_TAG "dac5820"
@@ -29,6 +30,7 @@
 
 struct dac5820 {
 	struct i2cdev *i2c;
+	struct plconfig *config;
 };
 
 struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_address)
@@ -36,26 +38,42 @@ struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_address)
 	struct dac5820 *dac;
 
 	dac = malloc(sizeof (struct dac5820));
-	assert(dac != NULL);
+
+	if (dac == NULL)
+		return NULL;
+
+	dac->config = plconfig_init(NULL, "libplhw");
+
+	if (dac->config == NULL)
+		goto err_free_dac;
+
+	if (i2c_address == PLHW_NO_I2C_ADDR)
+		i2c_address = i2cdev_get_config_addr(
+			dac->config, "DAC5820-address", 0x39);
 
 	dac->i2c = i2cdev_init(i2c_bus, i2c_address);
 
 	if (dac->i2c == NULL) {
 		LOG("failed to initialise I2C");
-		dac5820_free(dac);
-		dac = NULL;
+		goto err_free_plconfig;
 	}
 
 	return dac;
+
+err_free_plconfig:
+	plconfig_free(dac->config);
+err_free_dac:
+	free(dac);
+
+	return NULL;
 }
 
 void dac5820_free(struct dac5820 *dac)
 {
 	assert(dac != NULL);
 
-	if (dac->i2c != NULL)
-		i2cdev_free(dac->i2c);
-
+	plconfig_free(dac->config);
+	i2cdev_free(dac->i2c);
 	free(dac);
 }
 
