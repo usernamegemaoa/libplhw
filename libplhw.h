@@ -602,7 +602,7 @@ typedef int (*pbtn_abort_t)(void);
 
 /** Create an initialised push buttons instance
     @param[in] i2c_bus path to the I2C bus device
-    @param[in] i2c_address ADC I2C address
+    @param[in] i2c_address ADC I2C address or PLHW_NO_I2C_ADDR for default
     @return pointer to new push buttons instance or NULL if error
  */
 extern struct pbtn *pbtn_init(const char *i2c_bus, int i2c_address);

@@ -21,7 +21,9 @@
 
 #include "gpio_signals.h"
 #include "gpioex.h"
-#include "libplhw.h"
+#include "i2cdev.h"
+#include <libplhw.h>
+#include <plsdk/plconfig.h>
 #include <assert.h>
 #include <unistd.h>
 
@@ -32,6 +34,7 @@
 
 struct pbtn {
 	struct gpioex *gpio;
+	struct plconfig *config;
 	unsigned poll_sleep_us;
 	char btns;
 	pbtn_abort_t abort;
@@ -44,30 +47,46 @@ struct pbtn *pbtn_init(const char *i2c_bus, int i2c_address)
 	struct pbtn *b;
 
 	b = malloc(sizeof (struct pbtn));
-	assert(b != NULL);
+
+	if (b == NULL)
+		return NULL;
+
+	b->config = plconfig_init(NULL, "libplhw");
+
+	if (b->config == NULL)
+		goto err_free_pbtn;
+
+	if (i2c_address == PLHW_NO_I2C_ADDR)
+		i2c_address = i2cdev_get_config_addr(
+			b->config, "pbtn-address", 0x21);
 
 	b->gpio = gpioex_init(i2c_bus, i2c_address, GPIO_PBTN_I_MASK,
 			      GPIO_PBTN_O_MASK);
 
 	if (b->gpio == NULL) {
 		LOG("failed to initialise GPIO expander");
-		pbtn_free(b);
-		b = NULL;
-	} else {
-		b->btns = 0;
-		b->poll_sleep_us = PBTN_DEF_POLL_SLEEP_US;
+		goto err_free_plconfig;
 	}
 
+	b->btns = 0;
+	b->poll_sleep_us = PBTN_DEF_POLL_SLEEP_US;
+
 	return b;
+
+err_free_plconfig:
+	plconfig_free(b->config);
+err_free_pbtn:
+	free(b);
+
+	return NULL;
 }
 
 void pbtn_free(struct pbtn *b)
 {
 	assert(b != NULL);
 
-	if (b->gpio != NULL)
-		gpioex_free(b->gpio);
-
+	gpioex_free(b->gpio);
+	plconfig_free(b->config);
 	free(b);
 }
 
