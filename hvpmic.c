@@ -20,8 +20,9 @@
 */
 
 #include "hvpmic.h"
-#include "libplhw.h"
 #include "i2cdev.h"
+#include <libplhw.h>
+#include <plsdk/plconfig.h>
 #include <assert.h>
 #include <unistd.h>
 
@@ -32,6 +33,7 @@
 
 struct hvpmic {
 	struct i2cdev *i2c;
+	struct plconfig *config;
 	char prod_id;
 	char prod_rev;
 	char timing[HVPMIC_NB_TIMINGS];
@@ -50,35 +52,54 @@ static int save_timings(struct hvpmic *p);
 struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address)
 {
 	struct hvpmic *p;
-	int error = 1;
 
 	p = malloc(sizeof (struct hvpmic));
-	assert(p != NULL);
+
+	if (p == NULL)
+		return NULL;
+
+	p->config = plconfig_init(NULL, "libplhw");
+
+	if (p->config == NULL)
+		goto err_free_hvpmic;
+
+	if (i2c_address == PLHW_NO_I2C_ADDR)
+		i2c_address = i2cdev_get_config_addr(
+			p->config, "MAX17135-address", 0x48);
 
 	p->i2c = i2cdev_init(i2c_bus, i2c_address);
 
-	if (p->i2c == NULL)
+	if (p->i2c == NULL) {
 		LOG("failed to initialise I2C");
-	else if (read_const_registers(p) < 0)
-		LOG("failed to read registers");
-	else
-		error = 0;
-
-	if (error) {
-		hvpmic_free(p);
-		p = NULL;
-	} else {
-		p->flags.timings_read = 0;
-		p->flags.timings_written = 0;
-		p->pok_delay_us = 10000;
+		goto err_free_plconfig;
 	}
 
+	if (read_const_registers(p) < 0) {
+		LOG("failed to read registers");
+		goto err_free_i2cdev;
+	}
+
+	p->flags.timings_read = 0;
+	p->flags.timings_written = 0;
+	p->pok_delay_us = 10000;
+
 	return p;
+
+err_free_i2cdev:
+	i2cdev_free(p->i2c);
+err_free_plconfig:
+	plconfig_free(p->config);
+err_free_hvpmic:
+	free(p);
+
+	return NULL;
 }
 
 void hvpmic_free(struct hvpmic *p)
 {
 	assert(p != NULL);
+
+	plconfig_free(p->config);
 
 	if (p->i2c != NULL)
 		i2cdev_free(p->i2c);

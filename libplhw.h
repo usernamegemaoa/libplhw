@@ -124,7 +124,6 @@ extern int cpld_get_switch(struct cpld *cpld, enum cpld_switch sw);
    @{
 */
 
-#define HVPMIC_DEF_I2C_ADDR 0x48     /**< default HVPMIC I2C address */
 #define HVPMIC_NB_TIMINGS 8          /**< number of timings */
 
 /** Temperature sensor identifiers */
@@ -164,7 +163,7 @@ struct hvpmic;
 
 /** Create an initialised hvpmic instance
     @param[in] i2c_bus path to the I2C bus device
-    @param[in] i2c_address HVPMIC I2C address
+    @param[in] i2c_address HVPMIC I2C address or PLHW_NO_I2C_ADDR for default
     @return pointer to new hvpmic instance or NULL if error
  */
 extern struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address);
