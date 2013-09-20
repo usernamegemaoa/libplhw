@@ -478,8 +478,6 @@ extern int dac5820_output(struct dac5820 *dac, enum dac5820_channel_id channel,
    calibration.
 */
 
-#define ADC11607_DEF_I2C_ADDR 0x34   /**< default ADC I2C address */
-
 /** Voltage reference identifiers */
 enum adc11607_ref_id {
 	ADC11607_REF_VDD = 1,        /**< VDD reference voltage */
@@ -498,7 +496,7 @@ struct adc11607;
 
 /** Create an initialised adc11607 instance
     @param[in] i2c_bus path to the I2C bus device
-    @param[in] i2c_address ADC I2C address
+    @param[in] i2c_address ADC I2C address or PLHW_NO_I2C_ADDR for default
     @return pointer to new adc11607 instance or NULL if error
  */
 extern struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_address);

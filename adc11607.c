@@ -21,7 +21,8 @@
 
 #include "adc11607.h"
 #include "i2cdev.h"
-#include "libplhw.h"
+#include <libplhw.h>
+#include <plsdk/plconfig.h>
 #include <assert.h>
 
 #define LOG_TAG "adc11607"
@@ -29,6 +30,7 @@
 
 struct adc11607 {
 	struct i2cdev *i2c;
+	struct plconfig *config;
 	union adc11607_setup_config cmd;
 	unsigned nb_channels;
 	enum adc11607_ref_id ref_id;
@@ -49,7 +51,18 @@ struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_address)
 	int error = 1;
 
 	adc = malloc(sizeof (struct adc11607));
-	assert(adc != NULL);
+
+	if (adc == NULL)
+		return NULL;
+
+	adc->config = plconfig_init(NULL, "libplhw");
+
+	if (adc->config == NULL)
+		goto err_free_adc;
+
+	if (i2c_address == PLHW_NO_I2C_ADDR)
+		i2c_address = i2cdev_get_config_addr(
+			adc->config, "ADC11607-address", 0x34);
 
 	adc->i2c = i2cdev_init(i2c_bus, i2c_address);
 
@@ -66,11 +79,18 @@ struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_address)
 	}
 
 	return adc;
+
+err_free_adc:
+	free(adc);
+
+	return NULL;
 }
 
 void adc11607_free(struct adc11607 *adc)
 {
 	assert(adc != NULL);
+
+	plconfig_free(adc->config);
 
 	if (adc->i2c != NULL)
 		i2cdev_free(adc->i2c);
