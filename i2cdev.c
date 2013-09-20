@@ -20,6 +20,7 @@
 */
 
 #include "i2cdev.h"
+#include <plsdk/plconfig.h>
 #include <linux/i2c.h>
 #include <sys/ioctl.h>
 #include <assert.h>
@@ -54,6 +55,7 @@ struct i2cdev {
 	} flags;
 	uint8_t *block;
 	size_t block_size;
+	struct plconfig *config;
 };
 
 static int rdwr_data(struct i2cdev *d, __u16 flags, void *data, size_t size);
@@ -69,44 +71,62 @@ static void print_reg_io(const char *label, uint8_t addr, const uint8_t *reg,
 struct i2cdev *i2cdev_init(const char *bus_device, char address)
 {
 	struct i2cdev *d;
-	int error = 1;
 
-	assert(bus_device != NULL);
 	assert(!(address & 0x80));
 
 	d = malloc(sizeof (struct i2cdev));
-	assert(d != NULL);
+
+	if (d == NULL)
+		return NULL;
+
+	d->config = plconfig_init(NULL, "libplhw");
+
+	if (d->config == NULL)
+		goto err_free_i2cdev;
+
+	if (bus_device == NULL)
+		bus_device = plconfig_get_str(d->config, "i2c-bus", NULL);
+
+	if (bus_device == NULL)
+		goto err_free_plconfig;
 
 	d->addr = address;
 	d->fd = open(bus_device, O_RDWR);
 
-	if (d->fd < 0)
+	if (d->fd < 0) {
 		LOG("failed to open I2C bus device (%s)", bus_device);
-	else if (ioctl(d->fd, I2C_SLAVE, d->addr) < 0)
-		LOG("failed to set I2C address (0x%02X)", d->addr);
-	else
-		error = 0;
-
-	if (error) {
-		i2cdev_free(d);
-		d = NULL;
-	} else {
-		d->flags.verbose_log = 0;
-		d->flags.ignore_read_nak = 0;
-		d->flags.ignore_write_nak = 0;
-		d->block = NULL;
-		d->block_size = 0;
+		goto err_free_plconfig;
 	}
 
+	if (ioctl(d->fd, I2C_SLAVE, d->addr) < 0) {
+		LOG("failed to set I2C address (0x%02X)", d->addr);
+		goto err_close_fd;
+	}
+
+	d->flags.verbose_log = 0;
+	d->flags.ignore_read_nak = 0;
+	d->flags.ignore_write_nak = 0;
+	d->block = NULL;
+	d->block_size = 0;
+
 	return d;
+
+err_close_fd:
+	close(d->fd);
+err_free_plconfig:
+	plconfig_free(d->config);
+err_free_i2cdev:
+	free(d);
+
+	return NULL;
 }
 
 void i2cdev_free(struct i2cdev *d)
 {
 	assert(d != NULL);
 
-	if (d->fd >= 0)
-		close(d->fd);
+	close(d->fd);
+	plconfig_free(d->config);
 
 	if (d->block != NULL)
 		free(d->block);

@@ -35,9 +35,6 @@
 /** Library version */
 #define PLHW_VERSION "1.0"
 
-/** Default I2C bus device */
-#define PLHW_DEF_I2C_BUS "/dev/i2c-0"
-
 #ifndef min
 /** Get the smallest relative of two integers */
 # define min(a, b) (((a) < (b)) ? (a) : (b))
