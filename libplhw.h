@@ -49,8 +49,6 @@
    @{
  */
 
-#define CPLD_DEF_I2C_ADDR 0x70       /**< default CPLD I2C address */
-
 /** CLPD hardware switches, wired to various electronic parts */
 enum cpld_switch {
 	CPLD_HVEN,                   /**< high-voltage PSU enable */

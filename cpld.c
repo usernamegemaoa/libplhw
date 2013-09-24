@@ -21,7 +21,8 @@
 
 #include "cpld.h"
 #include "i2cdev.h"
-#include "libplhw.h"
+#include <libplhw.h>
+#include <plsdk/plconfig.h>
 #include <assert.h>
 #include <unistd.h>
 
@@ -32,6 +33,7 @@
 
 struct cpld {
 	struct i2cdev *i2c;
+	struct plconfig *config;
 	union {
 		struct {
 			struct cpld_byte_0 b0;
@@ -80,35 +82,51 @@ static int write_i2c_data(struct cpld *cpld);
 struct cpld *cpld_init(const char *i2c_bus, char i2c_address)
 {
 	struct cpld *cpld;
-	int error = 1;
 
 	cpld = malloc(sizeof (struct cpld));
-	assert(cpld != NULL);
+
+	if (cpld == NULL)
+		return cpld;
+
+	cpld->config = plconfig_init(NULL, "libplhw");
+
+	if (cpld->config == NULL)
+		goto err_free_cpld;
+
+	if (i2c_address == PLHW_NO_I2C_ADDR)
+		i2c_address = i2cdev_get_config_addr(
+			cpld->config, "CPLD-address", 0x70);
 
 	cpld->i2c = i2cdev_init(i2c_bus, i2c_address);
 
-	if (cpld->i2c == NULL)
+	if (cpld->i2c == NULL) {
 		LOG("failed to initialise I2C");
-	else if (read_i2c_data(cpld) < 0)
-		LOG("failed to read the I2C data");
-	else
-		error = 0;
+		goto err_free_plconfig;
+	}
 
-	if (error) {
-		cpld_free(cpld);
-		cpld = NULL;
+	if (read_i2c_data(cpld) < 0) {
+		LOG("failed to read the I2C data");
+		goto err_free_i2cdev;
 	}
 
 	return cpld;
+
+err_free_i2cdev:
+	i2cdev_free(cpld->i2c);
+err_free_plconfig:
+	plconfig_free(cpld->config);
+err_free_cpld:
+	free(cpld);
+
+	return NULL;
 }
 
 void cpld_free(struct cpld *cpld)
 {
 	assert(cpld != NULL);
 
-	if (cpld->i2c != NULL)
-		i2cdev_free(cpld->i2c);
-
+	i2cdev_free(cpld->i2c);
+	plconfig_free(cpld->config);
 	free(cpld);
 }
 
