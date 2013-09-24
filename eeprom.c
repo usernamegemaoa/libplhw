@@ -20,7 +20,7 @@
 */
 
 #include "i2cdev.h"
-#include "libplhw.h"
+#include <libplhw.h>
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>
@@ -78,8 +78,15 @@ struct eeprom *eeprom_init(const char *i2c_bus, char i2c_address,
 
 	assert(mode != NULL);
 
+	if (i2c_address == PLHW_NO_I2C_ADDR) {
+		LOG("no I2C address specified");
+		return NULL;
+	}
+
 	e = malloc(sizeof (struct eeprom));
-	assert(e != NULL);
+
+	if (e == NULL)
+		return NULL;
 
 	for (config = eeprom_config_table; config->mode != NULL; ++config) {
 		if (!strcmp(mode, config->mode)) {

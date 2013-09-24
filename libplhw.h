@@ -325,7 +325,6 @@ extern int hvpmic_get_fault(struct hvpmic *hvpmic);
    @{
 */
 
-#define EEPROM_DEF_I2C_ADDR 0x50     /**< default EEPROM I2C address */
 #define INVALID_OFFSET ((size_t) -1) /**< invalid offset code */
 
 /** Opaque structure used in public EEPROM interface */
