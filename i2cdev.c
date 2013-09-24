@@ -88,8 +88,10 @@ struct i2cdev *i2cdev_init(const char *bus_device, char address)
 	if (bus_device == NULL)
 		bus_device = plconfig_get_str(d->config, "i2c-bus", NULL);
 
-	if (bus_device == NULL)
+	if (bus_device == NULL) {
+		LOG("no I2C bus specified");
 		goto err_free_plconfig;
+	}
 
 	d->addr = address;
 	d->fd = open(bus_device, O_RDWR);
