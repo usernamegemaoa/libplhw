@@ -14,4 +14,5 @@ LOCAL_SRC_FILES := \
 	i2cdev.c \
 	pbtn.c \
 	util.c
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../plsdk/libplutil
 include $(BUILD_STATIC_LIBRARY)
