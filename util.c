@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 #define LOG_TAG "util"
-#include "log.h"
+#include <plsdk/log.h>
 
 int wait_cmd(void *ctx, int cmd, int set_value, int get_value,
 	     unsigned poll_us, unsigned timeout,

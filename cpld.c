@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #define LOG_TAG "cpld"
-#include "log.h"
+#include <plsdk/log.h>
 
 #define ARRAY_SIZE(array, type) (sizeof (array) / sizeof (type))
 

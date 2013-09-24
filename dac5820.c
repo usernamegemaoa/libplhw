@@ -26,7 +26,7 @@
 #include <assert.h>
 
 #define LOG_TAG "dac5820"
-#include "log.h"
+#include <plsdk/log.h>
 
 struct dac5820 {
 	struct i2cdev *i2c;

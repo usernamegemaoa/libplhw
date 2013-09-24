@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 #define LOG_TAG "pbtn"
-#include "log.h"
+#include <plsdk/log.h>
 
 #define PBTN_DEF_POLL_SLEEP_US 100000
 

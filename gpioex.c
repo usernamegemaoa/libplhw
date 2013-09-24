@@ -25,7 +25,7 @@
 #include <assert.h>
 
 #define LOG_TAG "gpioex"
-#include "log.h"
+#include <plsdk/log.h>
 
 struct gpioex {
 	struct i2cdev *i2c;

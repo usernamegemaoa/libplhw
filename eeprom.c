@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 #define LOG_TAG "eeprom"
-#include "log.h"
+#include <plsdk/log.h>
 
 #define WRITE_TIME_US 5000
 #define DEFAULT_I2C_BLOCK_SIZE 96

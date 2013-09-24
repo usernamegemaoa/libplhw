@@ -42,7 +42,7 @@ struct i2c_rdwr_ioctl_data {
 #endif
 
 #define LOG_TAG "i2cdev"
-#include "log.h"
+#include <plsdk/log.h>
 
 #define BLOCK_SIZE_STEP 64
 

@@ -29,7 +29,7 @@
 #define HVPMIC_ALLOW_SAVE 0
 
 #define LOG_TAG "hvpmic"
-#include "log.h"
+#include <plsdk/log.h>
 
 struct hvpmic {
 	struct i2cdev *i2c;
