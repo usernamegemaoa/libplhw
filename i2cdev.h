@@ -46,4 +46,9 @@ extern int i2cdev_write_reg(struct i2cdev *d, const void *reg, size_t reg_sz,
 extern int i2cdev_write_reg8(struct i2cdev *d, char reg, const void *data,
 			     size_t sz);
 
+struct plconfig;
+
+extern char i2cdev_get_config_addr(struct plconfig *p, const char *key,
+				   char def);
+
 #endif /* INCLUDE_I2C_DEV_H */

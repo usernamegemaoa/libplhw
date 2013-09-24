@@ -20,6 +20,7 @@
 */
 
 #include "i2cdev.h"
+#include <libplhw.h>
 #include <plsdk/plconfig.h>
 #include <linux/i2c.h>
 #include <sys/ioctl.h>
@@ -208,6 +209,22 @@ int i2cdev_write_reg8(struct i2cdev *d, char reg, const void *data, size_t sz)
 	assert(data != NULL);
 
 	return write_reg_data(d, (uint8_t *) &reg, 1, data, sz);
+}
+
+char i2cdev_get_config_addr(struct plconfig *p, const char *key, char def)
+{
+	unsigned long addr;
+
+	assert(p != NULL);
+
+	addr = plconfig_get_hex(p, key, def);
+
+	if ((addr > 0x7F) && (addr != PLHW_NO_I2C_ADDR)) {
+		LOG("Warning: invalid I2C address config 0x%02lX", addr);
+		addr = def;
+	}
+
+	return addr;
 }
 
 /* ----------------------------------------------------------------------------

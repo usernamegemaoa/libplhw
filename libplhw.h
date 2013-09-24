@@ -35,6 +35,9 @@
 /** Library version */
 #define PLHW_VERSION "1.0"
 
+/** Invalid I2C address value */
+#define PLHW_NO_I2C_ADDR 0xFF
+
 #ifndef min
 /** Get the smallest relative of two integers */
 # define min(a, b) (((a) < (b)) ? (a) : (b))
