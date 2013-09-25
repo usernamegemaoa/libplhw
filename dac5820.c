@@ -49,7 +49,7 @@ struct dac5820 *dac5820_init(const char *i2c_bus, int i2c_address)
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
 		i2c_address = i2cdev_get_config_addr(
-			dac->config, "DAC5820-address", 0x39);
+			dac->config, "MAX5820-address", 0x39);
 
 	dac->i2c = i2cdev_init(i2c_bus, i2c_address);
 
