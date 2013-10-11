@@ -1,3 +1,24 @@
+Release v1.0 -> v1.1 - 2013-10-11
+
+Guillaume Tucker (10):
+      eeprom: support any 24Cx EEPROM configuration
+      fix Doxygen build
+      i2cdev: add i2cdev_get_config_addr
+      eeprom: remove default I2C address
+      cpld: read the I2C address from the config file
+      i2cdev: print error message when no I2C bus specified
+      remove log.h and use plsdk/log.h instead
+      Android.mk: add include path to libplutil
+      dac5820, adc11607: rename configuration keys with part number
+      Android.mk: fix include path to libplutil
+
+Michele Marchetti (5):
+      i2cdev: read bus from config file if not provided
+      hvpmic: read I2C address from config file
+      dac5820: read I2C address from config file
+      adc11607: read I2C address from config file
+      pbtn: read I2C address from config file
+
 Release v0.5 -> v1.0 - 2013-07-19
 
 Guillaume Tucker (3):
