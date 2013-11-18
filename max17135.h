@@ -1,5 +1,5 @@
 /*
-  Plastic Logic hardware library - hvpmic
+  Plastic Logic hardware library - max17135
 
   Copyright (C) 2011, 2012, 2013 Plastic Logic Limited
 
@@ -19,40 +19,40 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INCLUDE_HVPMIC_H
-#define INCLUDE_HVPMIC_H 1
+#ifndef INCLUDE_MAX17135_H
+#define INCLUDE_MAX17135_H 1
 
-enum hvpmic_register {
-	HVPMIC_REG_EXT_TEMP   = 0x00,
-	HVPMIC_REG_CONF       = 0x01,
-	HVPMIC_REG_INT_TEMP   = 0x04,
-	HVPMIC_REG_TEMP_STAT  = 0x05,
-	HVPMIC_REG_PROD_REV   = 0x06,
-	HVPMIC_REG_PROD_ID    = 0x07,
-	HVPMIC_REG_DVR        = 0x08,
-	HVPMIC_REG_ENABLE     = 0x09,
-	HVPMIC_REG_FAULT      = 0x0A,
-	HVPMIC_REG_PROG       = 0x0C,
-	HVPMIC_REG_TIMING_1   = 0x10,
-	HVPMIC_REG_TIMING_2   = 0x11,
-	HVPMIC_REG_TIMING_3   = 0x12,
-	HVPMIC_REG_TIMING_4   = 0x13,
-	HVPMIC_REG_TIMING_5   = 0x14,
-	HVPMIC_REG_TIMING_6   = 0x15,
-	HVPMIC_REG_TIMING_7   = 0x16,
-	HVPMIC_REG_TIMING_8   = 0x17,
+enum max17135_register {
+	MAX17135_REG_EXT_TEMP   = 0x00,
+	MAX17135_REG_CONF       = 0x01,
+	MAX17135_REG_INT_TEMP   = 0x04,
+	MAX17135_REG_TEMP_STAT  = 0x05,
+	MAX17135_REG_PROD_REV   = 0x06,
+	MAX17135_REG_PROD_ID    = 0x07,
+	MAX17135_REG_DVR        = 0x08,
+	MAX17135_REG_ENABLE     = 0x09,
+	MAX17135_REG_FAULT      = 0x0A,
+	MAX17135_REG_PROG       = 0x0C,
+	MAX17135_REG_TIMING_1   = 0x10,
+	MAX17135_REG_TIMING_2   = 0x11,
+	MAX17135_REG_TIMING_3   = 0x12,
+	MAX17135_REG_TIMING_4   = 0x13,
+	MAX17135_REG_TIMING_5   = 0x14,
+	MAX17135_REG_TIMING_6   = 0x15,
+	MAX17135_REG_TIMING_7   = 0x16,
+	MAX17135_REG_TIMING_8   = 0x17,
 };
 
-/* HVPMIC_REG_CONF */
-union hvpmic_conf {
+/* MAX17135_REG_CONF */
+union max17135_conf {
 	struct {
 		char shutdown:1;
 	};
 	char byte;
 };
 
-/* HVPMIC_REG_TEMP_STAT */
-union hvpmic_temp_stat {
+/* MAX17135_REG_TEMP_STAT */
+union max17135_temp_stat {
 	struct {
 		char busy:1;
 		char open:1;
@@ -62,8 +62,8 @@ union hvpmic_temp_stat {
 	char byte;
 };
 
-/* HVPMIC_REG_ENABLE */
-union hvpmic_enable {
+/* MAX17135_REG_ENABLE */
+union max17135_enable {
 	struct {
 		char en:1;
 		char cen:1;
@@ -73,8 +73,8 @@ union hvpmic_enable {
 	char byte;
 };
 
-/* HVPMIC_REG_FAULT */
-union hvpmic_fault {
+/* MAX17135_REG_FAULT */
+union max17135_fault {
 	struct {
 		char fbpg:1;
 		char hvinp:1;
@@ -88,8 +88,8 @@ union hvpmic_fault {
 	char byte;
 };
 
-/* HVPMIC_REG_PROG */
-union hvpmic_prog {
+/* MAX17135_REG_PROG */
+union max17135_prog {
 	struct {
 		char dvr:1;
 		char timing:1;
@@ -97,4 +97,4 @@ union hvpmic_prog {
 	char byte;
 };
 
-#endif /* INCLUDE_HVPMIC_H */
+#endif /* INCLUDE_MAX17135_H */

@@ -122,198 +122,198 @@ extern int cpld_get_switch(struct cpld *cpld, enum cpld_switch sw);
    @{
 */
 
-#define HVPMIC_NB_TIMINGS 8          /**< number of timings */
+#define MAX17135_NB_TIMINGS 8        /**< number of timings */
 
 /** Temperature sensor identifiers */
-enum hvpmic_temp_id {
-	HVPMIC_TEMP_EXT = 1,         /**< external temperature sensor */
-	HVPMIC_TEMP_INT,             /**< internal temperature sensor */
+enum max17135_temp_id {
+	MAX17135_TEMP_EXT = 1,       /**< external temperature sensor */
+	MAX17135_TEMP_INT,           /**< internal temperature sensor */
 };
 
 /** Temperature failure codes */
-enum hvpmic_temp_failure {
-	HVPMIC_TEMP_OK = 1,          /**< no temperature failure */
-	HVPMIC_TEMP_OPEN,            /**< open circuit failure */
-	HVPMIC_TEMP_SHORT,           /**< short circuit failure */
+enum max17135_temp_failure {
+	MAX17135_TEMP_OK = 1,        /**< no temperature failure */
+	MAX17135_TEMP_OPEN,          /**< open circuit failure */
+	MAX17135_TEMP_SHORT,         /**< short circuit failure */
 };
 
 /** Fault identifiers */
-enum hvpmic_fault_id {
-	HVPMIC_FAULT_NONE = 1,       /**< no fault */
-	HVPMIC_FAULT_FBPG,           /**< GVDD undervoltage fault */
-	HVPMIC_FAULT_HVINP,          /**< HVINP undervoltage fault */
-	HVPMIC_FAULT_HVINN,          /**< HVINN undervoltage fault */
-	HVPMIC_FAULT_FBNG,           /**< GVEE undervoltage fault */
-	HVPMIC_FAULT_HVINPSC,        /**< HVINP short-circuit fault */
-	HVPMIC_FAULT_HVINNSC,        /**< HVINN short-circuit fault */
-	HVPMIC_FAULT_OT,             /**< thermal shutdown */
+enum max17135_fault_id {
+	MAX17135_FAULT_NONE = 1,     /**< no fault */
+	MAX17135_FAULT_FBPG,         /**< GVDD undervoltage fault */
+	MAX17135_FAULT_HVINP,        /**< HVINP undervoltage fault */
+	MAX17135_FAULT_HVINN,        /**< HVINN undervoltage fault */
+	MAX17135_FAULT_FBNG,         /**< GVEE undervoltage fault */
+	MAX17135_FAULT_HVINPSC,      /**< HVINP short-circuit fault */
+	MAX17135_FAULT_HVINNSC,      /**< HVINN short-circuit fault */
+	MAX17135_FAULT_OT,           /**< thermal shutdown */
 };
 
 /** High-voltage power supply identifiers */
-enum hvpmic_en_id {
-	HVPMIC_EN_EN = 1,            /**< main HV PSU */
-	HVPMIC_EN_CEN,               /**< first VCOM HV PSU */
-	HVPMIC_EN_CEN2,              /**< second VCOM HV PSU */
+enum max17135_en_id {
+	MAX17135_EN_EN = 1,          /**< main HV PSU */
+	MAX17135_EN_CEN,             /**< first VCOM HV PSU */
+	MAX17135_EN_CEN2,            /**< second VCOM HV PSU */
 };
 
-/** Opaque structure used in public HVPMIC interface */
-struct hvpmic;
+/** Opaque structure used in public MAX17135 interface */
+struct max17135;
 
-/** Create an initialised hvpmic instance
+/** Create an initialised max17135 instance
     @param[in] i2c_bus path to the I2C bus device
-    @param[in] i2c_address HVPMIC I2C address or PLHW_NO_I2C_ADDR for default
-    @return pointer to new hvpmic instance or NULL if error
+    @param[in] i2c_address MAX17135 I2C address or PLHW_NO_I2C_ADDR for default
+    @return pointer to new max17135 instance or NULL if error
  */
-extern struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address);
+extern struct max17135 *max17135_init(const char *i2c_bus, char i2c_address);
 
-/** Free hvpmic instance
-    @param[in] hvpmic hvpmic instance as created by hvpmic_init
+/** Free max17135 instance
+    @param[in] p max17135 instance as created by max17135_init
  */
-extern void hvpmic_free(struct hvpmic *hvpmic);
+extern void max17135_free(struct max17135 *p);
 
 /** Get product identifier code
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return product identifier code
 */
-extern int hvpmic_get_prod_id(struct hvpmic *hvpmic);
+extern int max17135_get_prod_id(struct max17135 *p);
 
 /** Get product revision number
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return product revision number
  */
-extern int hvpmic_get_prod_rev(struct hvpmic *hvpmic);
+extern int max17135_get_prod_rev(struct max17135 *p);
 
 /** Get VCOM value
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[out] value VCOM value
     @return 0 if success, -1 if error
  */
-extern int hvpmic_get_vcom(struct hvpmic *hvpmic, char *value);
+extern int max17135_get_vcom(struct max17135 *p, char *value);
 
 /** Set VCOM value
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] value VCOM value to set
     @return 0 if success, -1 if error
  */
-extern int hvpmic_set_vcom(struct hvpmic *hvpmic, char value);
+extern int max17135_set_vcom(struct max17135 *p, char value);
 
 /** Save VCOM value into persistent memory
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return 0 if success, -1 if error
  */
-extern int hvpmic_save_vcom(struct hvpmic *hvpmic);
+extern int max17135_save_vcom(struct max17135 *p);
 
 /** Get a timing value
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] n timing number
     @return timing value in ms (>= 0) if success, -1 if error
  */
-extern int hvpmic_get_timing(struct hvpmic *hvpmic, unsigned n);
+extern int max17135_get_timing(struct max17135 *p, unsigned n);
 
 /** Get all timing values
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[out] data user buffer to store the timings data
     @param[in] size size of the user buffer in bytes
     @return 0 if success, -1 if error
  */
-extern int hvpmic_get_timings(struct hvpmic *hvpmic, char *data, size_t size);
+extern int max17135_get_timings(struct max17135 *p, char *data, size_t size);
 
 /** Set a timing value
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] n timing number
     @param[in] value timing value in ms
     @return 0 if success, -1 if error
  */
-extern int hvpmic_set_timing(struct hvpmic *hvpmic, unsigned n, char value);
+extern int max17135_set_timing(struct max17135 *p, unsigned n, char value);
 
 /** Set all timing values
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] data user buffer with timings data
     @param[in] size size of the user buffer in bytes
     @return 0 if success, -1 if error
  */
-extern int hvpmic_set_timings(struct hvpmic *hvpmic, const char *data,
-                              size_t size);
+extern int max17135_set_timings(struct max17135 *p, const char *data,
+				size_t size);
 
 /** Save timings into persistent memory (DANGER: ONLY 3 WRITE CYCLES)
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return 0 if success, -1 if error
  */
-extern int hvpmic_save_timings(struct hvpmic *hvpmic);
+extern int max17135_save_timings(struct max17135 *p);
 
 /** Get status of temperature sensor
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return 0 if disabled, 1 if enabled or -1 if error
  */
-extern int hvpmic_get_temp_sensor_en(struct hvpmic *hvpmic);
+extern int max17135_get_temp_sensor_en(struct max17135 *p);
 
 /** Set status of temperature sensor
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] en status to set the temperature sensor to (0 or 1)
     @return 0 if success, -1 if error
  */
-extern int hvpmic_set_temp_sensor_en(struct hvpmic *hvpmic, int en);
+extern int max17135_set_temp_sensor_en(struct max17135 *p, int en);
 
 /** Get temperature measurement
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[out] temp temperature measurement
     @param[in] id temperature sensor identifier
     @return 0 if success, -1 if error
  */
-extern int hvpmic_get_temperature(struct hvpmic *hvpmic, short *temp,
-                                  enum hvpmic_temp_id id);
+extern int max17135_get_temperature(struct max17135 *p, short *temp,
+				    enum max17135_temp_id id);
 
 /** Get temperature failure code
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return temperature failure code or -1 if error
  */
-extern int hvpmic_get_temp_failure(struct hvpmic *hvpmic);
+extern int max17135_get_temp_failure(struct max17135 *p);
 
 /** Convert temperature value into degrees as floating point value
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] temp temperature measurement value
     @return temperature in Celsius degrees or -1 if error
  */
-extern float hvpmic_convert_temperature(struct hvpmic *hvpmic, short temp);
+extern float max17135_convert_temperature(struct max17135 *p, short temp);
 
 /** Get POK signal status
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return 1 if POK set, 0 if cleared or -1 if error
  */
-extern int hvpmic_get_pok(struct hvpmic *hvpmic);
+extern int max17135_get_pok(struct max17135 *p);
 
 /** Set POK delay
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param delay_us delay in micro-seconds to wait before polling POK status
  */
-extern void hvpmic_set_pok_delay(struct hvpmic *hvpmic, unsigned delay_us);
+extern void max17135_set_pok_delay(struct max17135 *p, unsigned delay_us);
 
 /** Wait for POK signal (block until set or timeout or I/O error)
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return 0 if success, -1 if error
  */
-extern int hvpmic_wait_for_pok(struct hvpmic *hvpmic);
+extern int max17135_wait_for_pok(struct max17135 *p);
 
 /** Enable a given HV PSU
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] id HV PSU identifier
     @param[in] on state to set the HV PSU to (1 to enable, 0 to disable)
     @return 0 if success, -1 if error
  */
-extern int hvpmic_set_en(struct hvpmic *hvpmic, enum hvpmic_en_id id, int on);
+extern int max17135_set_en(struct max17135 *p, enum max17135_en_id id, int on);
 
 /** Get the status of a given HV PSU
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @param[in] id HV PSU identifier
     @return 1 if enabled, 0 if disabled or -1 if error
  */
-extern int hvpmic_get_en(struct hvpmic *hvpmic, enum hvpmic_en_id id);
+extern int max17135_get_en(struct max17135 *p, enum max17135_en_id id);
 
 /** Get fault identifier
-    @param[in] hvpmic hvpmic instance
+    @param[in] p max17135 instance
     @return fault identifier (>= 0) or -1 if error
  */
-extern int hvpmic_get_fault(struct hvpmic *hvpmic);
+extern int max17135_get_fault(struct max17135 *p);
 
 /** @} */
 

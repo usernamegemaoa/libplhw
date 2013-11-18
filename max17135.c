@@ -1,5 +1,5 @@
 /*
-  Plastic Logic hardware library - hvpmic
+  Plastic Logic hardware library - max17135
 
   Copyright (C) 2011, 2012, 2013 Plastic Logic Limited
 
@@ -19,24 +19,27 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "hvpmic.h"
+#include "max17135.h"
 #include "i2cdev.h"
 #include <libplhw.h>
 #include <plsdk/plconfig.h>
 #include <assert.h>
 #include <unistd.h>
 
-#define HVPMIC_ALLOW_SAVE 0
+/* Set to 1 to allow timing registers to be persistently saved in the chip.
+ * IMPORTANT: This can be performed only 3 times, further attempts will cause
+ * the chip to malfunction.  */
+#define MAX17135_ALLOW_SAVE 0
 
-#define LOG_TAG "hvpmic"
+#define LOG_TAG "max17135"
 #include <plsdk/log.h>
 
-struct hvpmic {
+struct max17135 {
 	struct i2cdev *i2c;
 	struct plconfig *config;
 	char prod_id;
 	char prod_rev;
-	char timing[HVPMIC_NB_TIMINGS];
+	char timing[MAX17135_NB_TIMINGS];
 	struct {
 		unsigned timings_read:1;
 		unsigned timings_written:1;
@@ -44,16 +47,16 @@ struct hvpmic {
 	unsigned pok_delay_us;
 };
 
-static int read_const_registers(struct hvpmic *p);
-static int read_timings(struct hvpmic *p);
-static int write_timings(struct hvpmic *p);
-static int save_timings(struct hvpmic *p);
+static int read_const_registers(struct max17135 *p);
+static int read_timings(struct max17135 *p);
+static int write_timings(struct max17135 *p);
+static int save_timings(struct max17135 *p);
 
-struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address)
+struct max17135 *max17135_init(const char *i2c_bus, char i2c_address)
 {
-	struct hvpmic *p;
+	struct max17135 *p;
 
-	p = malloc(sizeof (struct hvpmic));
+	p = malloc(sizeof(struct max17135));
 
 	if (p == NULL)
 		return NULL;
@@ -61,7 +64,7 @@ struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address)
 	p->config = plconfig_init(NULL, "libplhw");
 
 	if (p->config == NULL)
-		goto err_free_hvpmic;
+		goto err_free_max17135;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
 		i2c_address = i2cdev_get_config_addr(
@@ -74,7 +77,7 @@ struct hvpmic *hvpmic_init(const char *i2c_bus, char i2c_address)
 		goto err_free_plconfig;
 	}
 
-	if (read_const_registers(p) < 0) {
+	if (read_const_registers(p)) {
 		LOG("failed to read registers");
 		goto err_free_i2cdev;
 	}
@@ -89,88 +92,85 @@ err_free_i2cdev:
 	i2cdev_free(p->i2c);
 err_free_plconfig:
 	plconfig_free(p->config);
-err_free_hvpmic:
+err_free_max17135:
 	free(p);
 
 	return NULL;
 }
 
-void hvpmic_free(struct hvpmic *p)
+void max17135_free(struct max17135 *p)
 {
 	assert(p != NULL);
 
+	i2cdev_free(p->i2c);
 	plconfig_free(p->config);
-
-	if (p->i2c != NULL)
-		i2cdev_free(p->i2c);
-
-	free (p);
+	free(p);
 }
 
-int hvpmic_get_prod_id(struct hvpmic *p)
+int max17135_get_prod_id(struct max17135 *p)
 {
 	assert(p != NULL);
 
 	return p->prod_id;
 }
 
-int hvpmic_get_prod_rev(struct hvpmic *p)
+int max17135_get_prod_rev(struct max17135 *p)
 {
 	assert(p != NULL);
 
 	return p->prod_rev;
 }
 
-int hvpmic_get_vcom(struct hvpmic *p, char *dvr)
+int max17135_get_vcom(struct max17135 *p, char *dvr)
 {
 	assert(p != NULL);
 	assert(dvr != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_DVR, dvr, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_DVR, dvr, 1))
 		return -1;
 
 	return 0;
 }
 
-int hvpmic_set_vcom(struct hvpmic *p, char value)
+int max17135_set_vcom(struct max17135 *p, char value)
 {
 	assert(p != NULL);
 
-	return i2cdev_write_reg8(p->i2c, HVPMIC_REG_DVR, &value, 1);
+	return i2cdev_write_reg8(p->i2c, MAX17135_REG_DVR, &value, 1);
 }
 
-int hvpmic_save_vcom(struct hvpmic *p)
+int max17135_save_vcom(struct max17135 *p)
 {
-#if HVPMIC_ALLOW_SAVE
-	union hvpmic_prog prog;
+#if MAX17135_ALLOW_SAVE
+	union max17135_prog prog;
 
 	assert(p != NULL);
 
 	prog.byte = 0;
 	prog.dvr = 1;
 
-	return i2cdev_write_reg8(p->i2c, HVPMIC_REG_PROG, &prog.byte, 1);
+	return i2cdev_write_reg8(p->i2c, MAX17135_REG_PROG, &prog.byte, 1);
 #else
 	LOG("writing the VCOM value is not allowed");
 	return -1;
 #endif
 }
 
-int hvpmic_get_timing(struct hvpmic *p, unsigned n)
+int max17135_get_timing(struct max17135 *p, unsigned n)
 {
 	assert(p != NULL);
-	assert(n < HVPMIC_NB_TIMINGS);
+	assert(n < MAX17135_NB_TIMINGS);
 
-	if (read_timings(p) < 0)
+	if (read_timings(p))
 		return -1;
 
 	return p->timing[n];
 }
 
-int hvpmic_get_timings(struct hvpmic *p, char *data, size_t size)
+int max17135_get_timings(struct max17135 *p, char *data, size_t size)
 {
 	const int rd_size =
-		(size < HVPMIC_NB_TIMINGS) ? size : HVPMIC_NB_TIMINGS;
+		(size < MAX17135_NB_TIMINGS) ? size : MAX17135_NB_TIMINGS;
 	const char *in;
 	char *out;
 	int i;
@@ -178,7 +178,7 @@ int hvpmic_get_timings(struct hvpmic *p, char *data, size_t size)
 	assert(p != NULL);
 	assert(data != NULL);
 
-	if (read_timings(p) < 0)
+	if (read_timings(p))
 		return -1;
 
 	in = p->timing;
@@ -190,12 +190,12 @@ int hvpmic_get_timings(struct hvpmic *p, char *data, size_t size)
 	return i;
 }
 
-int hvpmic_set_timing(struct hvpmic *p, unsigned n, char value)
+int max17135_set_timing(struct max17135 *p, unsigned n, char value)
 {
 	assert(p != NULL);
-	assert(n < HVPMIC_NB_TIMINGS);
+	assert(n < MAX17135_NB_TIMINGS);
 
-	if (read_timings(p) < 0)
+	if (read_timings(p))
 		return -1;
 
 	p->timing[n] = value;
@@ -203,17 +203,17 @@ int hvpmic_set_timing(struct hvpmic *p, unsigned n, char value)
 	return write_timings(p);
 }
 
-int hvpmic_set_timings(struct hvpmic *p, const char *data, size_t size)
+int max17135_set_timings(struct max17135 *p, const char *data, size_t size)
 {
 	const size_t wr_size =
-		(size < HVPMIC_NB_TIMINGS) ? size : HVPMIC_NB_TIMINGS;
+		(size < MAX17135_NB_TIMINGS) ? size : MAX17135_NB_TIMINGS;
 	const char *in;
 	char *out;
 	unsigned i;
 
 	assert(p != NULL);
 
-	if (read_timings(p) < 0)
+	if (read_timings(p))
 		return -1;
 
 	in = data;
@@ -225,7 +225,7 @@ int hvpmic_set_timings(struct hvpmic *p, const char *data, size_t size)
 	return write_timings(p);
 }
 
-int hvpmic_save_timings(struct hvpmic *p)
+int max17135_save_timings(struct max17135 *p)
 {
 	assert(p != NULL);
 
@@ -235,14 +235,14 @@ int hvpmic_save_timings(struct hvpmic *p)
 	return save_timings(p);
 }
 
-int hvpmic_get_temp_sensor_en(struct hvpmic *p)
+int max17135_get_temp_sensor_en(struct max17135 *p)
 {
-	union hvpmic_conf conf;
+	union max17135_conf conf;
 	int ret;
 
 	assert(p != NULL);
 
-	ret = i2cdev_read_reg8(p->i2c, HVPMIC_REG_CONF, &conf.byte, 1);
+	ret = i2cdev_read_reg8(p->i2c, MAX17135_REG_CONF, &conf.byte, 1);
 
 	if (!ret)
 		ret = conf.shutdown ? 0 : 1;
@@ -250,52 +250,48 @@ int hvpmic_get_temp_sensor_en(struct hvpmic *p)
 	return ret;
 }
 
-int hvpmic_set_temp_sensor_en(struct hvpmic *p, int en)
+int max17135_set_temp_sensor_en(struct max17135 *p, int en)
 {
-	union hvpmic_conf conf;
+	union max17135_conf conf;
 	int ret;
 
 	assert(p != NULL);
 
-	ret = i2cdev_read_reg8(p->i2c, HVPMIC_REG_CONF, &conf.byte, 1);
+	ret = i2cdev_read_reg8(p->i2c, MAX17135_REG_CONF, &conf.byte, 1);
 
 	if (!ret) {
 		conf.shutdown = en ? 0 : 1;
-		ret = i2cdev_write_reg8(p->i2c, HVPMIC_REG_CONF, &conf.byte,1);
+		ret = i2cdev_write_reg8(p->i2c, MAX17135_REG_CONF,
+					&conf.byte,1);
 	}
 
 	return ret;
 }
 
-int hvpmic_get_temperature(struct hvpmic *p, short *temp,
-                           enum hvpmic_temp_id id)
+int max17135_get_temperature(struct max17135 *p, short *temp,
+			     enum max17135_temp_id id)
 {
 	char reg;
 	char value[2];
-	int ret = 0;
 
 	assert(p != NULL);
 	assert(temp != NULL);
 
 	switch (id) {
-	case HVPMIC_TEMP_EXT:
-		reg = HVPMIC_REG_EXT_TEMP;
+	case MAX17135_TEMP_EXT:
+		reg = MAX17135_REG_EXT_TEMP;
 		break;
 
-	case HVPMIC_TEMP_INT:
-		reg = HVPMIC_REG_INT_TEMP;
+	case MAX17135_TEMP_INT:
+		reg = MAX17135_REG_INT_TEMP;
 		break;
 
 	default:
 		assert(!"invalid temperature identifier");
-		ret = -1;
-		break;
+		return -1;
 	}
 
-	if (ret < 0)
-		return -1;
-
-	if (i2cdev_read_reg8(p->i2c, reg, value, 2) < 0)
+	if (i2cdev_read_reg8(p->i2c, reg, value, 2))
 		return -1;
 
 	*temp = (value[0] << 8) | (value[1]);
@@ -303,51 +299,51 @@ int hvpmic_get_temperature(struct hvpmic *p, short *temp,
 	return 0;
 }
 
-int hvpmic_get_temp_failure(struct hvpmic *p)
+int max17135_get_temp_failure(struct max17135 *p)
 {
-	union hvpmic_temp_stat stat;
+	union max17135_temp_stat stat;
 
 	assert(p != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_TEMP_STAT, &stat.byte, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_TEMP_STAT, &stat.byte, 1))
 		return -1;
 
 	if (stat.open)
-		return HVPMIC_TEMP_OPEN;
+		return MAX17135_TEMP_OPEN;
 
 	if (stat.shrt)
-		return HVPMIC_TEMP_SHORT;
+		return MAX17135_TEMP_SHORT;
 
-	return HVPMIC_TEMP_OK;
+	return MAX17135_TEMP_OK;
 }
 
-float hvpmic_convert_temperature(struct hvpmic *p, short temp)
+float max17135_convert_temperature(struct max17135 *p, short temp)
 {
 	assert(p != NULL);
 
 	return (float) (((temp >> 7) & 0x1FF)) / 2;
 }
 
-int hvpmic_get_pok(struct hvpmic *p)
+int max17135_get_pok(struct max17135 *p)
 {
-	union hvpmic_fault fault;
+	union max17135_fault fault;
 
 	assert(p != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_FAULT, &fault.byte, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_FAULT, &fault.byte, 1))
 		return -1;
 
 	return fault.pok;
 }
 
-void hvpmic_set_pok_delay(struct hvpmic *p, unsigned delay_us)
+void max17135_set_pok_delay(struct max17135 *p, unsigned delay_us)
 {
 	assert(p != NULL);
 
 	p->pok_delay_us = delay_us;
 }
 
-int hvpmic_wait_for_pok(struct hvpmic *p)
+int max17135_wait_for_pok(struct max17135 *p)
 {
 	static const int POLL_SLEEP_US = 5000;
 	static const int POLL_LOOPS = 1000000 / POLL_SLEEP_US;
@@ -359,9 +355,9 @@ int hvpmic_wait_for_pok(struct hvpmic *p)
 	usleep(p->pok_delay_us);
 
 	for (i = POLL_LOOPS, pok = 0; i && !pok; --i) {
-		pok = hvpmic_get_pok(p);
+		pok = max17135_get_pok(p);
 
-		if (!pok < 0)
+		if (pok < 0)
 			LOG("failed to get POK status");
 		else if (!pok)
 			usleep(POLL_SLEEP_US);
@@ -375,104 +371,98 @@ int hvpmic_wait_for_pok(struct hvpmic *p)
 	return 0;
 }
 
-int hvpmic_set_en(struct hvpmic *p, enum hvpmic_en_id id, int on)
+int max17135_set_en(struct max17135 *p, enum max17135_en_id id, int on)
 {
-	union hvpmic_enable enable;
-	int ret = 0;
+	union max17135_enable enable;
 
 	assert(p != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_ENABLE, &enable.byte, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_ENABLE, &enable.byte, 1))
 		return -1;
 
 	switch (id) {
-	case HVPMIC_EN_EN:      enable.en     = on ? 1 : 0;    break;
-	case HVPMIC_EN_CEN:     enable.cen    = on ? 1 : 0;    break;
-	case HVPMIC_EN_CEN2:    enable.cen2   = on ? 1 : 0;    break;
+	case MAX17135_EN_EN:      enable.en     = on ? 1 : 0;    break;
+	case MAX17135_EN_CEN:     enable.cen    = on ? 1 : 0;    break;
+	case MAX17135_EN_CEN2:    enable.cen2   = on ? 1 : 0;    break;
 	default:
 		assert(!"invalid HV enable identifier");
-		ret = -1;
-		break;
+		return -1;
 	}
 
-	if (ret < 0)
-		return -1;
-
-	return i2cdev_write_reg8(p->i2c, HVPMIC_REG_ENABLE, &enable.byte, 1);
+	return i2cdev_write_reg8(p->i2c, MAX17135_REG_ENABLE, &enable.byte, 1);
 }
 
-int hvpmic_get_en(struct hvpmic *p, enum hvpmic_en_id id)
+int max17135_get_en(struct max17135 *p, enum max17135_en_id id)
 {
-	union hvpmic_enable enable;
+	union max17135_enable enable;
 	int ret;
 
 	assert(p != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_ENABLE, &enable.byte, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_ENABLE, &enable.byte, 1))
 		return -1;
 
 	switch (id) {
-	case HVPMIC_EN_EN:      ret = enable.en     ? 1 : 0;    break;
-	case HVPMIC_EN_CEN:     ret = enable.cen    ? 1 : 0;    break;
-	case HVPMIC_EN_CEN2:    ret = enable.cen2   ? 1 : 0;    break;
+	case MAX17135_EN_EN:      ret = enable.en     ? 1 : 0;    break;
+	case MAX17135_EN_CEN:     ret = enable.cen    ? 1 : 0;    break;
+	case MAX17135_EN_CEN2:    ret = enable.cen2   ? 1 : 0;    break;
 	default:
 		assert(!"invalid HV enable identifier");
-		ret = -1;
-		break;
+		return -1;
 	}
 
-	return ret;
+	return 0;
 }
 
-int hvpmic_get_fault(struct hvpmic *p)
+int max17135_get_fault(struct max17135 *p)
 {
-	union hvpmic_fault fault;
+	union max17135_fault fault;
 
 	assert(p != NULL);
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_FAULT, &fault.byte, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_FAULT, &fault.byte, 1))
 		return -1;
 
 	if (fault.fbpg)
-		return HVPMIC_FAULT_FBPG;
+		return MAX17135_FAULT_FBPG;
 
 	if (fault.hvinp)
-		return HVPMIC_FAULT_HVINN;
+		return MAX17135_FAULT_HVINN;
 
 	if (fault.hvinp)
-		return HVPMIC_FAULT_HVINP;
+		return MAX17135_FAULT_HVINP;
 
 	if (fault.fbng)
-		return HVPMIC_FAULT_FBNG;
+		return MAX17135_FAULT_FBNG;
 
 	if (fault.hvinpsc)
-		return HVPMIC_FAULT_HVINPSC;
+		return MAX17135_FAULT_HVINPSC;
 
 	if (fault.hvinnsc)
-		return HVPMIC_FAULT_HVINNSC;
+		return MAX17135_FAULT_HVINNSC;
 
 	if (fault.ot)
-		return HVPMIC_FAULT_OT;
+		return MAX17135_FAULT_OT;
 
-	return HVPMIC_FAULT_NONE;
+	return MAX17135_FAULT_NONE;
 }
 
 /* ----------------------------------------------------------------------------
  * static functions
  */
 
-static int read_const_registers(struct hvpmic *p)
+static int read_const_registers(struct max17135 *p)
 {
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_PROD_REV, &p->prod_rev, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_PROD_REV, &p->prod_rev, 1))
 		return -1;
 
-	if (i2cdev_read_reg8(p->i2c, HVPMIC_REG_PROD_ID, &p->prod_id, 1) < 0)
+	if (i2cdev_read_reg8(p->i2c, MAX17135_REG_PROD_ID, &p->prod_id, 1))
 		return -1;
 
 	return 0;
 }
 
-static int read_timings(struct hvpmic *p)
+static int read_timings(struct max17135 *p)
 {
 	char reg;
 	char *timing;
@@ -482,11 +472,11 @@ static int read_timings(struct hvpmic *p)
 	if (p->flags.timings_read)
 		return 0;
 
-	reg = HVPMIC_REG_TIMING_1;
+	reg = MAX17135_REG_TIMING_1;
 	timing = p->timing;
 	ret = 0;
 
-	for (i = 0; (i < HVPMIC_NB_TIMINGS) && !ret; ++i)
+	for (i = 0; (i < MAX17135_NB_TIMINGS) && !ret; ++i)
 		ret = i2cdev_read_reg8(p->i2c, reg++, timing++, 1);
 
 	if (!ret)
@@ -497,9 +487,9 @@ static int read_timings(struct hvpmic *p)
 	return ret;
 }
 
-static int write_timings(struct hvpmic *p)
+static int write_timings(struct max17135 *p)
 {
-	char reg = HVPMIC_REG_TIMING_1;
+	char reg = MAX17135_REG_TIMING_1;
 	char *timing = p->timing;
 	int ret = 0;
 	int i;
@@ -507,7 +497,7 @@ static int write_timings(struct hvpmic *p)
 	if (p->flags.timings_written)
 		return 0;
 
-	for (i = 0; (i < HVPMIC_NB_TIMINGS) && !ret; ++i)
+	for (i = 0; (i < MAX17135_NB_TIMINGS) && !ret; ++i)
 		ret = i2cdev_write_reg8(p->i2c, reg++, timing++, 1);
 
 	if (!ret)
@@ -518,18 +508,19 @@ static int write_timings(struct hvpmic *p)
 	return ret;
 }
 
-static int save_timings(struct hvpmic *p)
+static int save_timings(struct max17135 *p)
 {
-#if HVPMIC_ALLOW_SAVE
+#if MAX17135_ALLOW_SAVE
 	int ret = write_timings(p);
 
 	if (!ret) {
-		union hvpmic_prog prog;
+		union max17135_prog prog;
 
 		prog.byte = 0;
 		prog.timing = 1;
 
-		ret = i2cdev_write_reg8(p->i2c, HVPMIC_REG_PROG, &prog.byte,1);
+		ret = i2cdev_write_reg8(p->i2c, MAX17135_REG_PROG,
+					&prog.byte,1);
 	}
 
 	return ret;
