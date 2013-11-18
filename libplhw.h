@@ -319,6 +319,140 @@ extern int max17135_get_fault(struct max17135 *p);
 
 
 /**
+   @name HVPMIC - TPS65185
+   @{
+*/
+
+/** Opaque structure used in public TPS65185 interface */
+struct tps65185;
+
+/** Constant chip information */
+struct tps65185_info {
+	unsigned version;            /**< version number */
+	unsigned major;              /**< major version number */
+	unsigned minor;              /**< minor version number */
+};
+
+/** Power modes */
+enum tps65185_power {
+	TPS65185_ACTIVE = 7,         /**< active (HV is turned on) */
+	TPS65185_STANDBY = 6,        /**< standby (HV is turned off) */
+};
+
+/** Power rail identifiers */
+enum tps65185_en_id {
+	TPS65185_V3P3_EN = 5,        /**< V3P3 (3.3V power supply) */
+	TPS65185_VCOM_EN = 4,        /**< VCOM */
+	TPS65185_VDDH_EN = 3,        /**< VDDH (postive gate voltage) */
+	TPS65185_VPOS_EN = 2,        /**< VPOS (positive source voltage) */
+	TPS65185_VEE_EN = 1,         /**< VEE (negative gate voltage) */
+	TPS65185_VNEG_EN = 0,        /**< VNEG (negative source voltage) */
+};
+
+/** Power rail sequence strobe identifiers */
+enum tps65185_strobe {
+	TPS65185_STROBE1 = 0,        /**< STROBE1 identifier */
+	TPS65185_STROBE2 = 1,        /**< STROBE2 identifier */
+	TPS65185_STROBE3 = 2,        /**< STROBE3 identifier */
+	TPS65185_STROBE4 = 3,        /**< STROBE4 identifier */
+};
+
+/** Power rail sequence strobe delay values */
+enum tps65185_delay {
+	TPS65185_STROBE_3_MS = 0,    /**< 3ms strobe delay */
+	TPS65185_STROBE_6_MS = 1,    /**< 6ms strobe delay */
+	TPS65185_STROBE_9_MS = 2,    /**< 9ms strobe delay */
+	TPS65185_STROBE_12_MS = 3,   /**< 12ms strobe delay */
+};
+
+/** Power rail up/down sequence data */
+struct tps65185_seq {
+	enum tps65185_strobe vddh;   /**< strobe value for VDDH */
+	enum tps65185_strobe vpos;   /**< strobe value for VPOS */
+	enum tps65185_strobe vee;    /**< strobe value for VEE */
+	enum tps65185_strobe vneg;   /**< strobe value for VNEG */
+	enum tps65185_delay strobe1; /**< delay of STROBE1 */
+	enum tps65185_delay strobe2; /**< delay of STROBE2 */
+	enum tps65185_delay strobe3; /**< delay of STROBE3 */
+	enum tps65185_delay strobe4; /**< delay of STROBE4 */
+};
+
+/** Create an initialised tps65185 instance
+    @param[in] i2c_bus path to the I2C bus device
+    @param[in] i2c_address TPS65185 I2C address or PLHW_NO_I2C_ADDR for default
+    @return pointer to new tps17135 instance or NULL if error
+ */
+extern struct tps65185 *tps65185_init(const char *i2c_bus, char i2c_address);
+
+/** Free tps65185 instance
+    @param[in] p max17135 instance as created by tps65185_init
+ */
+extern void tps65185_free(struct tps65185 *p);
+
+/** Get constant chip information
+    @param[in] p tps65185 instance
+    @param[out] info information structure
+*/
+extern void tps65185_get_info(struct tps65185 *p, struct tps65185_info *info);
+
+/** Set VCOM register value
+    @param[in] p tps65185 instance
+    @param[in] value 9-bit VCOM register value to use
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_set_vcom(struct tps65185 *p, uint16_t value);
+
+/** Get the VCOM register value
+    @param[in] p tps65185 instance
+    @param[out] value 9-bit VCOM register value read back
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_get_vcom(struct tps65185 *p, uint16_t *value);
+
+/** Set power up/down sequence configuration
+    @param[in] p tps65185 instance
+    @param[in] seq sequence information structure to use
+    @param[in] up 1 for power up sequence, 0 for power down
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_set_seq(struct tps65185 *p, const struct tps65185_seq *seq,
+			    int up);
+
+/** Get power up/down sequence configuration
+    @param[in] p tps65185 instance
+    @param[out] seq structure to store the sequence information read back
+    @param[in] up 1 for power up sequence, 0 for power down
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_get_seq(struct tps65185 *p, struct tps65185_seq *seq,
+			    int up);
+
+/** Set the power mode and state of HV outputs
+    @param[in] p tps65185 instance
+    @param[in] power power mode (active for HV on, standby for HV off)
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_set_power(struct tps65185 *p, enum tps65185_power power);
+
+/** Enable or disable a specific output power rail and wait for completion
+    @param[in] p tps65185 instance
+    @param[in] id power rail identifier
+    @param[in] on 1 to enable, 0 to disable
+    @return 0 if success, -1 if error
+*/
+extern int tps65185_set_en(struct tps65185 *p, enum tps65185_en_id id, int on);
+
+/** Get the enable state of a spcific output power rail
+    @param[in] p tps65185 instance
+    @param[in] id power rail identifier
+    @return 0 if disabled, 1 if enabled or -1 if error
+*/
+extern int tps65185_get_en(struct tps65185 *p, enum tps65185_en_id id);
+
+/** @} */
+
+
+/**
    @name EEPROM
    @{
 */
