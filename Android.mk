@@ -10,7 +10,8 @@ LOCAL_SRC_FILES := \
 	dac5820.c \
 	eeprom.c \
 	gpioex.c \
-	hvpmic.c \
+	max17135.c \
+	tps65185.c \
 	i2cdev.c \
 	pbtn.c \
 	util.c
