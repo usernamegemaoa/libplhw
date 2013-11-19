@@ -1,3 +1,11 @@
+Release v1.1 -> v1.2 - 2013-11-19
+
+Guillaume Tucker (4):
+      rename hvpmic -> max17135
+      add support for TI TPS65185 HVPMIC
+      Android.mk: update with max17135 and tps65185
+      max17135: fix compiler warning about unused variable
+
 Release v1.0 -> v1.1 - 2013-10-11
 
 Guillaume Tucker (10):
