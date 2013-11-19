@@ -411,7 +411,7 @@ int max17135_get_en(struct max17135 *p, enum max17135_en_id id)
 		return -1;
 	}
 
-	return 0;
+	return ret;
 }
 
 int max17135_get_fault(struct max17135 *p)
