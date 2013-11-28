@@ -57,7 +57,7 @@ struct pbtn *pbtn_init(const char *i2c_bus, int i2c_address)
 		goto err_free_pbtn;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
-		i2c_address = i2cdev_get_config_addr(
+		i2c_address = plconfig_get_i2c_addr(
 			b->config, "pbtn-address", 0x21);
 
 	b->gpio = gpioex_init(i2c_bus, i2c_address, GPIO_PBTN_I_MASK,

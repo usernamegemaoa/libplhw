@@ -61,7 +61,7 @@ struct adc11607 *adc11607_init(const char *i2c_bus, int i2c_address)
 		goto err_free_adc;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
-		i2c_address = i2cdev_get_config_addr(
+		i2c_address = plconfig_get_i2c_addr(
 			adc->config, "MAX116xx-address", 0x34);
 
 	adc->i2c = i2cdev_init(i2c_bus, i2c_address);

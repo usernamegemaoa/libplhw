@@ -55,7 +55,7 @@ struct tps65185 *tps65185_init(const char *i2c_bus, char i2c_address)
 		goto err_free_tps65185;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
-		i2c_address = i2cdev_get_config_addr(
+		i2c_address = plconfig_get_i2c_addr(
 			p->config, "TPS65185-address", 0x68);
 
 	p->i2c = i2cdev_init(i2c_bus, i2c_address);

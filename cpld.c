@@ -94,7 +94,7 @@ struct cpld *cpld_init(const char *i2c_bus, char i2c_address)
 		goto err_free_cpld;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
-		i2c_address = i2cdev_get_config_addr(
+		i2c_address = plconfig_get_i2c_addr(
 			cpld->config, "CPLD-address", 0x70);
 
 	cpld->i2c = i2cdev_init(i2c_bus, i2c_address);

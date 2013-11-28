@@ -67,7 +67,7 @@ struct max17135 *max17135_init(const char *i2c_bus, char i2c_address)
 		goto err_free_max17135;
 
 	if (i2c_address == PLHW_NO_I2C_ADDR)
-		i2c_address = i2cdev_get_config_addr(
+		i2c_address = plconfig_get_i2c_addr(
 			p->config, "MAX17135-address", 0x48);
 
 	p->i2c = i2cdev_init(i2c_bus, i2c_address);
