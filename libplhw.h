@@ -33,7 +33,7 @@
 */
 
 /** Library version */
-#define PLHW_VERSION "1.2"
+#define PLHW_VERSION "1.3"
 
 /** Invalid I2C address value */
 #define PLHW_NO_I2C_ADDR 0xFF

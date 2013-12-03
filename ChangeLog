@@ -1,3 +1,9 @@
+Release v1.2 -> v1.3 - 2013-11-28
+
+Guillaume Tucker (2):
+      i2cdev: remove _get_config_addr function
+      use plconfig_get_i2c_addr instead of i2cdev_get_config_addr
+
 Release v1.1 -> v1.2 - 2013-11-19
 
 Guillaume Tucker (4):
